@@ -1442,6 +1442,8 @@ func (h *Handle) linkModify(link Link, flags int) error {
 		addBridgeAttrs(link, linkInfo)
 	case *GTP:
 		addGTPAttrs(link, linkInfo)
+	case *Gtp5g:
+		addGtp5gAttrs(link, linkInfo)
 	case *Xfrmi:
 		addXfrmiAttrs(link, linkInfo)
 	case *IPoIB:
@@ -1714,6 +1716,8 @@ func LinkDeserialize(hdr *unix.NlMsghdr, m []byte) (Link, error) {
 						link = &Vrf{}
 					case "gtp":
 						link = &GTP{}
+					case "gtp5g":
+						link = &Gtp5g{}
 					case "xfrm":
 						link = &Xfrmi{}
 					case "tun":
@@ -1769,6 +1773,8 @@ func LinkDeserialize(hdr *unix.NlMsghdr, m []byte) (Link, error) {
 						parseBridgeData(link, data)
 					case "gtp":
 						parseGTPData(link, data)
+					case "gtp5g":
+						parseGtp5gData(link, data)
 					case "xfrm":
 						parseXfrmiData(link, data)
 					case "tun":
@@ -3073,6 +3079,29 @@ func parseGTPData(link Link, data []syscall.NetlinkRouteAttr) {
 			gtp.PDPHashsize = int(native.Uint32(datum.Value))
 		case nl.IFLA_GTP_ROLE:
 			gtp.Role = int(native.Uint32(datum.Value))
+		}
+	}
+}
+
+func addGtp5gAttrs(gtp5g *Gtp5g, linkInfo *nl.RtAttr) {
+	data := linkInfo.AddRtAttr(nl.IFLA_INFO_DATA, nil)
+	data.AddRtAttr(nl.IFLA_GTP5G_FD1, nl.Uint32Attr(uint32(gtp5g.FD1)))
+	data.AddRtAttr(nl.IFLA_GTP5G_PDR_HASHSIZE, nl.Uint32Attr(131072))
+	if gtp5g.Role != nl.GTP5G_ROLE_UPF {
+		data.AddRtAttr(nl.IFLA_GTP_ROLE, nl.Uint32Attr(uint32(gtp5g.Role)))
+	}
+}
+
+func parseGtp5gData(link Link, data []syscall.NetlinkRouteAttr) {
+	gtp5g := link.(*Gtp5g)
+	for _, datum := range data {
+		switch datum.Attr.Type {
+		case nl.IFLA_GTP5G_FD1:
+			gtp5g.FD1 = int(native.Uint32(datum.Value))
+		case nl.IFLA_GTP5G_PDR_HASHSIZE:
+			gtp5g.PDRHashsize = int(native.Uint32(datum.Value))
+		case nl.IFLA_GTP5G_ROLE:
+			gtp5g.Role = int(native.Uint32(datum.Value))
 		}
 	}
 }

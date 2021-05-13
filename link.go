@@ -1173,6 +1173,21 @@ func (gtp *GTP) Type() string {
 	return "gtp"
 }
 
+type Gtp5g struct {
+	LinkAttrs
+	FD1         int
+	PDRHashsize int
+	Role        int
+}
+
+func (gtp5g *Gtp5g) Attrs() *LinkAttrs {
+	return &gtp5g.LinkAttrs
+}
+
+func (gtp5g *Gtp5g) Type() string {
+	return "gtp5g"
+}
+
 // Virtual XFRM Interfaces
 //	Named "xfrmi" to prevent confusion with XFRM objects
 type Xfrmi struct {

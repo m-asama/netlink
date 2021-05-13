@@ -71,6 +71,10 @@ const (
 	GENL_GTP_ATTR_PAD
 )
 
+const (
+	GENL_GTP5G_NAME = "gtp5g"
+)
+
 type Genlmsg struct {
 	Command uint8
 	Version uint8
